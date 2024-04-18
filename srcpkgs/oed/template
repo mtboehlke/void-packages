@@ -1,0 +1,60 @@
+# Template file for 'oed'
+pkgname=oed
+version=7.4
+revision=2
+build_style=configure
+short_desc="Portable OpenBSD ed(1) editor"
+maintainer="Matt Boehlke <mtboehlke@gmail.com>"
+license=custom
+homepage="https://github.com/ibara/oed"
+distfiles="https://github.com/ibara/oed/releases/download/oed-${version}/oed-${version}.tar.gz"
+checksum=31662ce90797a7de13f6b409d562ce32a4da291d304e9a4b0a6dc70d45953d16
+alternatives="
+ ed:ed:/usr/bin/oed
+ ed:ed.1:/usr/share/man/man1/oed.1
+"
+conflicts=ed
+
+case "$XBPS_TARGET_MACHINE" in
+*-musl)
+	;;
+*)
+	nocross="Do not try to cross compile with musl-bootstrap"
+	hostmakedepends+=" musl-bootstrap"
+	STACC="musl-gcc"
+	;;
+esac
+
+do_configure() {
+	[ -z "$STACC" ] && STACC=$CC
+	CC=$STACC ./configure --prefix=/usr --enable-static
+}
+
+pre_build() {
+	ascript="/Copyright/,/^ \*\// { sub(/^ \*[ \/]?/,\"\"); match(\$0,/@\(#\)/); if (RSTART == 0) print \$0 }"
+	install -d ./licenses
+	for f in buf engine reallocarray strlcpy
+	do
+		cat << EOF > ./"licenses/${f}.txt"
+$(awk "$ascript" "${f}.c")
+EOF
+	done
+	unset f ascript
+	( cd ./licenses
+		mv engine.txt license.txt
+	)
+}
+
+do_install() {
+	[ -x ed ] && mytgt='ed' || mytgt='oed'
+	vbin "$mytgt" oed
+	vman ed.1 oed.1
+	vdoc POSIX
+	( cd ./licenses
+		for f in *.txt
+		do
+			vlicense "$f"
+		done
+	)
+	unset f mytgt
+}

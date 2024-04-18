@@ -1,0 +1,13 @@
+diff --git a/configure b/configure
+index 23b7803..425c8a9 100755
+--- a/configure
++++ b/configure
+@@ -242,7 +242,7 @@ if [ $static -ne 0 ] ; then
+ fi
+ 
+ printf "checking for C compiler... "
+-cccheck
++cc=$CC
+ if [ $? -ne 0 ] ; then
+   echo "not found"
+   echo "Please install a C compiler and re-run configure."
