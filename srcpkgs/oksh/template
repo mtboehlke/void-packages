@@ -2,11 +2,11 @@
 pkgname=oksh
 version=7.8
 revision=1
-build_style=gnu-configure
-makedepends="ncurses-devel"
+build_style=configure
+hostmakedepends="oed"
 short_desc="Portable OpenBSD ksh, based on the Public Domain Korn Shell"
 maintainer="Leah Neukirchen <leah@vuxu.org>"
-license="Public Domain"
+license="custom"
 homepage="https://github.com/ibara/oksh"
 distfiles="https://github.com/ibara/oksh/releases/download/oksh-${version}/oksh-${version}.tar.gz"
 checksum=3b30d5a1183b829590cc020d8ab87f22d288e98dc3fdf12feb7159536beaa950
@@ -18,3 +18,49 @@ alternatives="
  sh:sh:/usr/bin/oksh
  sh:sh.1:/usr/share/man/man1/oksh.1
 "
+case "$XBPS_TARGET_ARCH" in
+*-musl)
+	;;
+*)
+	nocross="Do not try to cross compile with musl-bootstrap"
+	hostmakedepends+=" musl-bootstrap"
+	STACC="musl-gcc"
+	;;
+esac
+
+do_configure() {
+	[ -z "$STACC" ] && STACC=$CC
+	./configure --prefix=/usr --cc="$STACC" --enable-static --enable-small
+}
+
+pre_build() {
+	ascript="/Copyright/,/^ \*\// { sub(/^ \*[ \/]?/,\"\"); match(\$0,/@\(#\)/); if (RSTART == 0) print \$0 }"
+	install -d ./licenses
+	for f in reallocarray strtonum vis
+	do
+		cat << EOF > ./"licenses/${f}.txt"
+$(awk "$ascript" "${f}.c")
+EOF
+	done
+	unset f ascript
+	( cd ./licenses
+		mv vis.txt license.txt
+		oed -s license.txt << 'EOF'
+H
+1s/(c).*$/(c) 1983, 1989, 1991, 1993/
+w
+q
+EOF
+	)
+}
+
+do_install() {
+	vbin oksh
+	vman oksh.1
+	vdoc NOTES
+	for f in licenses/*.txt LEGAL CONTRIBUTORS
+	do
+		vlicense "$f"
+	done
+	unset f
+}
