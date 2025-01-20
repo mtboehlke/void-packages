@@ -1,0 +1,30 @@
+# Template file for 'clzip'
+pkgname=clzip
+version=1.16
+revision=1
+build_style=configure
+short_desc="C language version of the lzip data compressor"
+maintainer="Matt Boehlke <git@mtboehlke.com>"
+license="GPL-2.0-or-later"
+homepage="https://lzip.nongnu.org/clzip.html"
+distfiles="${NONGNU_SITE}/lzip/clzip/clzip-${version}.tar.lz"
+checksum=ec7e0a99d5758f4b5e16eb65d9e011759fb995a57ba236bbd922e3ee88da5701
+
+case "$XBPS_TARGET_MACHINE" in
+*-musl)
+	;;
+*)
+	nocross="Do not try to cross compile with musl-bootstrap"
+	hostmakedepends+=" musl-bootstrap"
+	STACC=musl-gcc
+	;;
+esac
+LDFLAGS="-static"
+
+do_configure() {
+	./configure --prefix=/usr \
+		CC="${STACC:-"$CC"}" \
+		CPPFLAGS="${CPPFLAGS}" \
+		CFLAGS="${CFLAGS}" \
+		LDFLAGS="${LDFLAGS}"
+}
