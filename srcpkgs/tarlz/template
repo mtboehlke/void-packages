@@ -1,17 +1,17 @@
 # Template file for 'tarlz'
 pkgname=tarlz
-version=0.29
-revision=2
+version=0.31
+revision=1
 build_style=configure
 configure_args="--prefix=/usr"
 makedepends="lzlib-devel"
-checkdepends="lzip"
+checkdepends="lzip lziprecover"
 short_desc="Archiver with multimember lzip compression"
 maintainer="Matt Boehlke <git@mtboehlke.com>"
 license="GPL-2.0-or-later"
 homepage="https://www.nongnu.org/lzip/tarlz.html"
 distfiles="${NONGNU_SITE}/lzip/tarlz/tarlz-${version}.tar.lz"
-checksum=7e127f1e1b1b62ca6e3417fde32f3ae0481ba5886f56a8553a215b19d81c6c19
+checksum=e7fafcaf83ce215d94f758ff07037a3fda4bcea006ccb7909ce3f83218e98f71
 
 CPPFLAGS="-D_LARGE_FILE_SOURCE=1 -D_FILE_OFFSET_BITS=64"
 
